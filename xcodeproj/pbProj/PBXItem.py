@@ -1,7 +1,7 @@
 # Copyright (c) 2016, Samantha Marshall (http://pewpewthespells.com)
 # All rights reserved.
 #
-# https://github.com/samdmarshall/pylocalizer
+# https://github.com/samdmarshall/xcodeproj
 #
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
@@ -31,7 +31,6 @@
 import os
 import collections
 from . import PBX_Constants
-from ...Helpers              import xcrun
 
 def getGraphNodeWithIdentifier(identifier, project):
     found_object = project.objectForIdentifier(identifier)
@@ -163,13 +162,16 @@ class PBX_Base_Reference(PBXItem):
         return project_dir
     def resolveDeveloperDirPath(self, project): # pylint: disable=no-self-use
         _ = project
-        return xcrun.resolve_developer_path()
+        developer_dir_path = os.environ.get('DEVELOPER_DIR', '')
+        if developer_dir_path == '':
+            raise ValueError('Unable to get a value for DEVELOPER_DIR, please make sure this is defined!')
+        return developer_dir_path
     def resolveSDKPath(self, project): # pylint: disable=no-self-use
         _ = project
-        sdk_name = os.environ.get('SDKROOT')
-        if sdk_name == '':
-            raise ValueError('Unable to get a value for SDKROOT, please make sure to run this inside of Xcode!')
-        return xcrun.resolve_sdk_path(sdk_name)
+        sdk_path = os.environ.get('XCODEPROJ_SDKROOT_PATH', '')
+        if sdk_path == '':
+            raise ValueError('Unable to get a value for XCODEPROJ_SDKROOT_PATH, please make this is defined!')
+        return sdk_path
     def resolvePath(self, project):
         source = self.store[PBX_Constants.kPBX_REFERENCE_sourceTree]
         source_func = resolvePathTypeFromSource(source)
